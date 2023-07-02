@@ -10,6 +10,7 @@ class YaUploader:
         self.token_vk = token_vk
 
     def upload(self, id: str):
+        #Токен VK ввести в файл: token.txt
         url = 'https://cloud-api.yandex.net/v1/disk/resources/upload'
         url_folder = '/'.join(url.split('/')[:-1])
         url_vk = 'https://api.vk.com/method/photos.get'
@@ -23,11 +24,10 @@ class YaUploader:
         }
 
 
-
+        # Вычисление махсимального размера фотографии и запись информации о них в json
         dict_photos_profile = requests.get(url_vk, params=params_vk).json()
-        # pprint(dict_photos_profile)
         list_photo = dict_photos_profile['response']['items']
-        size_dict = {'s': 0, 'm': 1, 'x': 2, 'o': 3, 'p': 4, 'q': 5, 'r': 6, 'y': 7, 'z': 8, 'w': 9}
+        size_dict = {'s': 0, 'm': 1, 'x': 2, 'o': 3, 'p': 4, 'q': 5, 'r': 6, 'y': 7, 'z': 8, 'w': 9} # Словарь для вычисления максимального размера
         like_list_check = []
         list_info = []
         for element in list_photo:
@@ -43,13 +43,14 @@ class YaUploader:
                 max_v = max(size['type'], key=size_dict.get)
             dict_file = {'file_name': str(filename) + '.jpg', 'size':max_v}
             list_info.append(dict_file)
-            with open('info.json', 'w+') as f:
+            with open('info.json', 'w+') as f: # Запись в json
                 json.dump(list_info, f, indent=2)
             path_to_file = size['url']
 
-            for i in tqdm(list_info):
-                pass
+            for i in tqdm(list_info): # Прогресс бар по загрузке фото
+                time.sleep(1)
 
+            # Загрузка фото на яндекс диск
             fload_name = 'Фото'
             params_folder = {'path': fload_name}
             params = {'path': f'{fload_name}/{filename}',
@@ -81,4 +82,3 @@ if __name__ == '__main__':
         token_vk = file.read()
     uploader = YaUploader(token, token_vk)
     result = uploader.upload(int(input('Введите id пользователя vk:')))
-    # print(f'Файл {path_to_file} загружен')
